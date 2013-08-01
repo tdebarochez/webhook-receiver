@@ -40,4 +40,4 @@ The three first can be done with a good reverse proxy (like nginx do well) and t
 License
 ---
 
-MIT
+MIT, see LICENSE file.
