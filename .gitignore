@@ -1,0 +1,8 @@
+config.json
+logs/*
+!logs/.gitignore
+targets/GET/*
+targets/POST/*
+!targets/GET/.gitignore
+!targets/POST/.gitignore
+pid
