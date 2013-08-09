@@ -76,7 +76,8 @@ querystring = require 'querystring'
 url = require('url')
 
 short_msg = (req, res, code, msg) ->
-  log_message = "[" + (new Date) + "] " + req.socket.remoteAddress + " " + req.method + ' "' + req.url + '" (' + code + ')' + (if code >= 200 then " : #{msg}" else "")
+  remote_ip = if "x-forwarded-for" of req.headers then req.headers['x-forwarded-for'] else req.socket.remoteAddress
+  log_message = "[" + (new Date) + "] " + remote_ip + " " + req.method + ' "' + req.url + '" (' + code + ')' + (if code >= 200 then " : #{msg}" else "")
   access_log.write log_message + "\n"
   res.writeHead code, 'Content-Type': 'text/plain'
   return res.end msg
