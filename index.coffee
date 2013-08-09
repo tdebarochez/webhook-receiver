@@ -106,6 +106,8 @@ http.createServer( (req, res) ->
         tmp = datas.toString()
         if "content-type" of req.headers and req.headers['content-type'] is "application/json"
           tmp = JSON.parse tmp
+        else
+          tmp = querystring.parse tmp
       params = []
       for key, value of tmp
         params.push "#{key}=#{value}"
