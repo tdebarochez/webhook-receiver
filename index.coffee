@@ -59,6 +59,18 @@ if '--truncate-logs' in process.argv
     process.exit 3
   return
 
+if '--targets' in process.argv
+  for method in ["POST", "GET"]
+    console.log "[#{method}]"
+    targets = fs.readdirSync(path.join(__dirname, "targets", method)).filter (filename) ->
+      not filename.match /(\.pid|^.gitignore)$/g
+    if targets.length < 1
+      console.log "  (none)"
+    else
+      for target in targets
+        console.log "  #{target}"
+  return
+
 if '--help' in process.argv or '-h' in process.argv or '--usage' in process.argv
   console.log """
   webhook-receiver: HTTP server, used to execute simple tasks in background
