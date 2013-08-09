@@ -90,6 +90,7 @@ http.createServer( (req, res) ->
   statTarget = (req, res, filename) ->
     return (err, stat) ->
       if err
+        error req, err
         return short_msg req, res, 404, "target not found"
       if req.method is "HEAD"
         return short_msg req, res, 200, ""
@@ -129,7 +130,7 @@ http.createServer( (req, res) ->
     return ->
       if req.method not in ["GET", "POST", "HEAD"]
         return short_msg req, res, 405, "bad HTTP verb"
-      filename = url.parse(req.url).pathname.replace /[^\d\w]+/g, ""
+      filename = url.parse(req.url).pathname.replace(/\.+/g, '.').replace /[^\d\w\-\.]+/g, ""
       if filename is ""
         return short_msg req, res, 400, "target missing"
       filename = path.join(__dirname, "targets", req.method, filename)
