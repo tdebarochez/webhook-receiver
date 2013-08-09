@@ -100,7 +100,12 @@ http.createServer( (req, res) ->
               (stat.mode & 0o0001))
         error req, "[#{filename}] is not executable"
         return short_msg req, res, 500, "nok"
-      tmp = querystring.parse if req.method is 'GET' then url.parse(req.url).query else datas.toString()
+      if req.method is 'GET'
+        tmp = querystring.parse url.parse(req.url).query
+      else
+        tmp = datas.toString()
+        if "content-type" of req.headers and req.headers['content-type'] is "application/json"
+          tmp = JSON.parse tmp
       params = []
       for key, value of tmp
         params.push "#{key}=#{value}"
