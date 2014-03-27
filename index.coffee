@@ -87,11 +87,12 @@ http = require 'http'
 querystring = require 'querystring'
 url = require('url')
 
-short_msg = (req, res, code, msg) ->
+short_msg = (req, res, code, msg, header_alredy_sent) ->
   remote_ip = if "x-forwarded-for" of req.headers then req.headers['x-forwarded-for'] else req.socket.remoteAddress
   log_message = "[" + (new Date) + "] " + remote_ip + " " + req.method + ' "' + req.url + '" (' + code + ')' + (if code >= 200 then " : #{msg}" else "")
   access_log.write log_message + "\n"
-  res.writeHead code, 'Content-Type': 'text/plain'
+  if not header_alredy_sent
+    res.writeHead code, 'Content-Type': 'text/plain'
   return res.end msg
 log = (req, msg) ->
   console.log "[" + (new Date) + "] " + msg
@@ -99,7 +100,7 @@ error = (req, err) ->
   error_log.write "[" + (new Date) + "] #{err}\n"
 
 http.createServer( (req, res) ->
-  statTarget = (req, res, filename) ->
+  statTarget = (req, res, filename, specific_conf) ->
     return (err, stat) ->
       if err
         error req, err
@@ -125,18 +126,31 @@ http.createServer( (req, res) ->
       params = []
       for key, value of tmp
         params.push "#{key}=#{value}"
+      detach = if specific_conf.detach in [true, false] then specific_conf.detach else true
+      log req, "execute [#{filename}] " + if detach then "d" else ""
       try
-        target = spawn filename, params,
-          detached: true,
-          stdio: [ 'ignore', out_childs, err_childs ]
+        if detach
+          target = spawn filename, params,
+            detached: true,
+            stdio: [ 'ignore', out_childs, err_childs ]
+          target.unref()
+        else
+          res.writeHead 200, 'Content-Type': 'text/plain'
+          target = spawn filename, params
+          target.stdout.on 'data', (buffer)->
+            res.write buffer
+          target.stderr.on 'data', (buffer)->
+            res.write buffer
+          target.on 'close', (code)->
+            log req, "return [#{filename}] " + code
+            short_msg req, res, 200, "ok", true
         fs.writeFileSync filename + '.pid', target.pid
-        target.unref()
       catch e
         console.log(filename)
         error req, e
         return short_msg req, res, 500, "nok"
-      log req, "execute [#{filename}]"
-      return short_msg req, res, 200, "ok"
+      if detach
+        return short_msg req, res, 200, "ok"
 
   onCompleteReceive = (req, res) ->
     return ->
@@ -145,8 +159,11 @@ http.createServer( (req, res) ->
       filename = url.parse(req.url).pathname.replace(/\.+/g, '.').replace /[^\d\w\-\.]+/g, ""
       if filename is ""
         return short_msg req, res, 400, "target missing"
+      specific_conf = {}
+      if conf.repo_specific and conf.repo_specific[filename]
+        specific_conf = conf.repo_specific[filename]
       filename = path.join(__dirname, "targets", req.method, filename)
-      fs.stat filename, statTarget(req, res, filename)
+      fs.stat filename, statTarget(req, res, filename, specific_conf)
 
   datas = new Buffer 0
   req.on "data", (chunk) ->

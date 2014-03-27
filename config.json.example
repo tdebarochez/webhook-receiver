@@ -1,4 +1,9 @@
 {
   "tcp_port": 1337,
-  "tcp_address": "127.0.0.1"
+  "tcp_address": "127.0.0.1",
+  "repo_specific": {
+    "example-repo": {
+      "detach": false
+    }
+  }
 }
