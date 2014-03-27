@@ -1,0 +1,22 @@
+{
+  "name": "webhook-receiver",
+  "version": "1.0.0",
+  "description": "Webhook-receiver",
+  "main": "index.coffee",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "./node_modules/.bin/coffee index.coffee"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tdebarochez/webhook-receiver.git"
+  },
+  "dependencies": {
+    "coffee-script": "*"
+  },
+  "author": "Thomas de Barochez",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/tdebarochez/webhook-receiver/issues"
+  }
+}
