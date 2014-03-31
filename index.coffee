@@ -75,11 +75,12 @@ if '--help' in process.argv or '-h' in process.argv or '--usage' in process.argv
   console.log """
   webhook-receiver: HTTP server, used to execute simple tasks in background
   Usage:
-    --background     run HTTP server in background
-    --help           display this message
-    --kill           kill background running server
-    --restart        restart background HTTP server
-    --truncate-logs  empty log files
+    --background         run HTTP server in background
+    -h, --help, --usage  display this message
+    --kill               kill background running server
+    --restart            restart background HTTP server
+    --targets            list all targets
+    --truncate-logs      empty log files
   """
   return
 
